@@ -25,8 +25,8 @@ Or install it yourself as:
 
 To parse file and see parsed information
 ```ruby
-require 'kafo_parsers/kafo_module_parser'
-hash = KafoParsers::KafoModuleParser.parse('/puppet/module/manifests/init.pp')
+require 'kafo_parsers/puppet_module_parser'
+hash = KafoParsers::PuppetModuleParser.parse('/puppet/module/manifests/init.pp')
 p hash
 ```
 
