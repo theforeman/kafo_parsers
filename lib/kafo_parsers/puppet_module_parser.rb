@@ -55,6 +55,7 @@ module KafoParsers
     end
 
     def validations(param = nil)
+      return [] if @object.code.nil?
       @object.code.select { |stmt| stmt.is_a?(Puppet::Parser::AST::Function) && stmt.name =~ /^validate_/ }
     end
 
