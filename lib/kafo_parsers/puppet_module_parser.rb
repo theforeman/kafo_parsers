@@ -27,7 +27,7 @@ module KafoParsers
 
     def initialize(file)
       @file = file
-      raise ModuleName, "File not found #{file}, check you answer file" unless File.exists?(file)
+      raise ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
       Puppet.settings[:confdir] ||= '/' # just some stubbing
       if Puppet::Node::Environment.respond_to?(:create)
         env = Puppet::Node::Environment.create(:production, [], '')
