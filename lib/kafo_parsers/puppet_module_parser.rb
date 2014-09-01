@@ -38,9 +38,13 @@ module KafoParsers
       parser.import(@file)
 
       # Find object corresponding to class defined in init.pp in list of hostclasses
-      parser.environment.known_resource_types.hostclasses.each do |ast_objects|
-        ast_type = ast_objects.last
-        @object = ast_type if ast_type.file == file
+      ast_types = parser.environment.known_resource_types.hostclasses.map(&:last)
+      @object = ast_types.find { |ast_type| ast_type.file == file }
+
+      # Find object in list of definitions if not found among hostclasses
+      if @object.nil?
+        ast_types = parser.environment.known_resource_types.definitions.map(&:last)
+        @object = ast_types.find { |ast_type| ast_type.file == file }
       end
 
       parser
@@ -65,17 +69,19 @@ module KafoParsers
     #   :types => { $param1 => 'boolean'},
     #   :groups => { $param1 => ['Parameters', 'Advanced']},
     #   :conditions => { $param1 => '$db_type == "mysql"'},
+    #   :object_type => 'hostclass' # or definition
     # }
     def docs
-      data = { :docs => {}, :types => {}, :groups => {}, :conditions => {} }
+      data = { :docs => {}, :types => {}, :groups => {}, :conditions => {}, :object_type => '' }
       if @object.nil?
         raise DocParseError, "no documentation found for manifest #{@file}, parsing error?"
       elsif !@object.doc.nil?
-        parser            = DocParser.new(@object.doc).parse
-        data[:docs]       = parser.docs
-        data[:groups]     = parser.groups
-        data[:types]      = parser.types
-        data[:conditions] = parser.conditions
+        parser             = DocParser.new(@object.doc).parse
+        data[:docs]        = parser.docs
+        data[:groups]      = parser.groups
+        data[:types]       = parser.types
+        data[:conditions]  = parser.conditions
+        data[:object_type] = @object.type.to_s
       end
       data
     end

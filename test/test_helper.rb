@@ -78,6 +78,8 @@ class testing(
 }
 EOS
 
+DEFINITION_MANIFEST = BASIC_MANIFEST.sub('class testing(', 'define testing2(')
+
 class Minitest::Spec
   before do
 

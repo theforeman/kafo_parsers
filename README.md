@@ -7,6 +7,8 @@ to do is provide a path to manifest file you want to be parsed.
 The library is used in [Kafo](https://github.com/theforeman/kafo), which can 
 be used to get an idea of what's possible to build on top of this library.
 
+Currently puppet classes and types (definitions) are supported.
+
 ## Installation
 
 Add this line to your application's Gemfile:
