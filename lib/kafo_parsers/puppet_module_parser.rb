@@ -8,6 +8,8 @@ module KafoParsers
   # have to be defined in puppet DSL and vice versa, we just gather all info
   # we can read from the whole manifest
   class PuppetModuleParser
+    @@puppet_initialized = false
+
     # You can call this method to get all supported information from a given manifest
     #
     # @param [ String ] manifest file path to parse
@@ -28,12 +30,17 @@ module KafoParsers
     def initialize(file)
       @file = file
       raise ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
-      Puppet.settings[:confdir] ||= '/' # just some stubbing
-      if Puppet::Node::Environment.respond_to?(:create)
-        env = Puppet::Node::Environment.create(:production, [], '')
-      else
-        env = Puppet::Node::Environment.new(:production)
+
+      unless @@puppet_initialized
+        if Puppet::PUPPETVERSION.to_i >= 3
+          Puppet.initialize_settings
+        else
+          Puppet.parse_config
+        end
+        @@puppet_initialized = true
       end
+
+      env = Puppet::Node::Environment.new
       parser = Puppet::Parser::Parser.new(env)
       parser.import(@file)
 
