@@ -5,7 +5,7 @@
 
 Summary: Puppet module parsers
 Name: %{?scl_prefix}rubygem-%{gem_name}
-Version: 0.0.4
+Version: 0.0.5
 Release: 1%{?dist}
 Group: Development/Libraries
 License: GPLv3+
@@ -78,6 +78,10 @@ cp -a .%{gem_dir}/* \
 %doc %{gem_instdir}/README.md
 
 %changelog
+* Sun Mar 29 2015 Marek Hulan <mhulan@redhat.com> 0.0.5-1
+- fixes #9916 - initialise Puppet using public APIs (dcleal@redhat.com)
+- Pin test gems for compatibility (dcleal@redhat.com)
+
 * Mon Sep 01 2014 Marek Hulan <mhulan@redhat.com> 0.0.4-1
 - Add support for parsing definitions (mhulan@redhat.com)
 
