@@ -29,7 +29,7 @@ module KafoParsers
 
     def initialize(file)
       @file = file
-      raise ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
+      raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
 
       unless @@puppet_initialized
         if Puppet::PUPPETVERSION.to_i >= 3
@@ -81,7 +81,7 @@ module KafoParsers
     def docs
       data = { :docs => {}, :types => {}, :groups => {}, :conditions => {}, :object_type => '' }
       if @object.nil?
-        raise DocParseError, "no documentation found for manifest #{@file}, parsing error?"
+        raise KafoParsers::DocParseError, "no documentation found for manifest #{@file}, parsing error?"
       elsif !@object.doc.nil?
         parser             = DocParser.new(@object.doc).parse
         data[:docs]        = parser.docs

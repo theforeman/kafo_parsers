@@ -2,6 +2,7 @@
 require 'rdoc'
 require 'rdoc/markup' # required for RDoc < 0.9.5
 require 'rdoc/markup/parser' # required for RDoc < 0.9.5
+require 'kafo_parsers/exceptions'
 
 module KafoParsers
   class DocParser
@@ -64,10 +65,10 @@ module KafoParsers
             if condition.nil?
               condition = value
             else
-              raise DocParseError, "Two or more conditions defined for #{name}"
+              raise KafoParsers::DocParseError, "Two or more conditions defined for #{name}"
             end
           else
-            raise DocParseError, "Unknown attribute #{name}"
+            raise KafoParsers::DocParseError, "Unknown attribute #{name}"
         end
 
       end
