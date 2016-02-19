@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "ci_reporter", "~> 1.9.0"
 
   # puppet manifests parsing
-  spec.add_development_dependency 'puppet', '< 4.0.0'
+  spec.add_development_dependency 'puppet', '< 5.0.0'
   spec.add_dependency 'rdoc', '>= 3.9.0'
+  spec.add_dependency 'json'
 end

@@ -8,11 +8,18 @@ module KafoParsers
 
   class ParserNotAvailable < StandardError
     def initialize(wrapped)
-      @wrapped = wrapped
+      if wrapped.is_a?(Exception)
+        @wrapped = wrapped
+      else
+        @message = wrapped
+      end
     end
 
     def message
-      @wrapped.message
+      @message || @wrapped.message
     end
+  end
+  
+  class ParseError < StandardError
   end
 end
