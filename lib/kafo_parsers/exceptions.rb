@@ -6,4 +6,13 @@ module KafoParsers
   class ModuleName < StandardError
   end
 
+  class ParserNotAvailable < StandardError
+    def initialize(wrapped)
+      @wrapped = wrapped
+    end
+
+    def message
+      @wrapped.message
+    end
+  end
 end

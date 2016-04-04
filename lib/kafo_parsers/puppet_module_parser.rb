@@ -1,5 +1,4 @@
 # encoding: UTF-8
-require 'puppet'
 require 'kafo_parsers/doc_parser'
 
 module KafoParsers
@@ -9,6 +8,13 @@ module KafoParsers
   # we can read from the whole manifest
   class PuppetModuleParser
     @@puppet_initialized = false
+
+    def self.available?
+      require 'puppet'
+      [2, 3].include?(Puppet::PUPPETVERSION.to_i)
+    rescue LoadError => e
+      raise KafoParsers::ParserNotAvailable.new(e)
+    end
 
     # You can call this method to get all supported information from a given manifest
     #
@@ -32,6 +38,7 @@ module KafoParsers
       raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
 
       unless @@puppet_initialized
+        require 'puppet'
         if Puppet::PUPPETVERSION.to_i >= 3
           Puppet.initialize_settings
         else
