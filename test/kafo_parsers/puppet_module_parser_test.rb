@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'test_helper'
 require 'kafo_parsers/puppet_module_parser'
 
@@ -87,6 +88,13 @@ module KafoParsers
           specify { conditions['username'].must_equal '$db_type == \'mysql\'' }
           specify { conditions['password'].must_equal '$db_type == \'mysql\' && $username != \'root\'' }
         end
+      end
+
+      describe 'with UTF-8 manifest' do
+        let(:manifest) { "# e✗amp✓e\n" + BASIC_MANIFEST.sub('class testing(', 'class testingutf8(') }
+        let(:data) { PuppetModuleParser.parse(ManifestFileFactory.build(manifest).path) }
+        let(:parameters) { data[:parameters] }
+        specify { parameters.must_include 'version' }
       end
     end
   end
