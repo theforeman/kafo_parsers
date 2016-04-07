@@ -1,5 +1,6 @@
 # encoding: UTF-8
 require 'kafo_parsers/doc_parser'
+require 'kafo_parsers/validation'
 
 module KafoParsers
   # Based on ideas from puppet-parse by Johan van den Dorpe
@@ -75,7 +76,9 @@ module KafoParsers
 
     def validations(param = nil)
       return [] if @object.code.nil?
-      @object.code.select { |stmt| stmt.is_a?(Puppet::Parser::AST::Function) && stmt.name =~ /^validate_/ }
+      @object.code.select { |stmt| stmt.is_a?(Puppet::Parser::AST::Function) && stmt.name =~ /^validate_/ }.map do |v|
+        Validation.new(v.name, interpret_validation_args(v.arguments))
+      end
     end
 
     # returns data in following form
@@ -99,6 +102,24 @@ module KafoParsers
         data[:object_type] = @object.type.to_s
       end
       data
+    end
+
+    private
+
+    def interpret_validation_args(args)
+      args.map do |arg|
+        if arg.is_a?(Puppet::Parser::AST::Variable)
+          arg.to_s
+        elsif arg.is_a?(Puppet::Parser::AST::ASTArray)
+          interpret_validation_args(arg.to_a)
+        elsif arg.is_a?(Puppet::Parser::AST::Concat)
+          interpret_validation_args(arg.value).join
+        elsif arg.respond_to? :value
+          arg.value
+        else
+          arg
+        end
+      end
     end
   end
 end
