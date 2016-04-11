@@ -12,7 +12,7 @@ module KafoParsers
         begin
           provider.available?
         rescue ParserNotAvailable => e
-          options[:logger].debug "Provider #{provider} not available: #{e.message}"
+          options[:logger].debug "Provider #{provider} not available: #{e.message}" if options[:logger]
           false
         end
       end
