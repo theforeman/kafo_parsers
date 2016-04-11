@@ -1,16 +1,15 @@
-# encoding: utf-8
 require 'test_helper'
-require 'kafo_parsers/puppet_module_parser'
+require 'kafo_parsers/puppet_strings_module_parser'
 
 module KafoParsers
-  describe PuppetModuleParser do
+  describe PuppetStringsModuleParser do
     describe ".parse(class)" do
-      # we skip tests for this parser if puppet 4.0.0+ is installed
-      next if Gem::Specification.find_all_by_name('puppet').sort_by(&:version).last.version >= Gem::Version.new('4.0.0')
+      # we skip tests for this parser if puppet-strings is not installed
+      next if Gem::Specification.find_all_by_name('puppet-strings').empty?
 
       { 'hostclass' => BASIC_MANIFEST, 'definition' => DEFINITION_MANIFEST }.each_pair do |type, manifest|
 
-        data = PuppetModuleParser.parse(ManifestFileFactory.build(manifest).path)
+        data = PuppetStringsModuleParser.parse(ManifestFileFactory.build(manifest).path)
 
         describe 'data structure' do
           let(:keys) { data.keys }
@@ -46,14 +45,12 @@ module KafoParsers
           specify { values['version'].must_equal '1.0' }
           specify { values['sub_version'].must_equal 'beta' }
           specify { values['undef'].must_equal :undef }
-          specify { values['debug'].must_equal true }
+          specify { values['debug'].must_equal 'true' }
         end
 
-        describe "parsed validations" do
+        describe "parsed validations are not supported" do
           let(:validations) { data[:validations] }
-          specify { validations.size.must_equal 1 }
-          specify { validations.map(&:name).each { |v| v.must_equal 'validate_string' } }
-          specify { validations.each { |v| v.must_be_kind_of Puppet::Parser::AST::Function } }
+          specify { validations.must_be_empty }
         end
 
         describe "parsed documentation" do
@@ -93,13 +90,6 @@ module KafoParsers
           specify { conditions['username'].must_equal '$db_type == \'mysql\'' }
           specify { conditions['password'].must_equal '$db_type == \'mysql\' && $username != \'root\'' }
         end
-      end
-
-      describe 'with UTF-8 manifest' do
-        let(:manifest) { "# e✗amp✓e\n" + BASIC_MANIFEST.sub('class testing(', 'class testingutf8(') }
-        let(:data) { PuppetModuleParser.parse(ManifestFileFactory.build(manifest).path) }
-        let(:parameters) { data[:parameters] }
-        specify { parameters.must_include 'version' }
       end
     end
   end

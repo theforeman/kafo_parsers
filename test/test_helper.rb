@@ -16,6 +16,7 @@ BASIC_MANIFEST = <<EOS
 # === Parameters
 #
 # $version::         some version number
+# $sub_version::     some sub version string
 # $documented::      something that is documented but not used
 # $undef::           default is undef
 # $multiline::       param with multiline
@@ -52,6 +53,7 @@ BASIC_MANIFEST = <<EOS
 #
 class testing(
   $version = '1.0',
+  $sub_version = "beta",
   $undocumented = 'does not have documentation',
   $undef = undef,
   $multiline = undef,
