@@ -57,6 +57,19 @@ Only Puppet versions 2.6.x, 2.7.x and 3.x are supported.
 
 Add `gem 'puppet', '< 4'` to your application's Gemfile to use this.
 
+#### PuppetStringsModuleParser
+
+If you use Puppet 4 you prefer PuppetStringsModuleParser which leverages
+puppet-strings to parse puppet manifests.
+
+```ruby
+require 'kafo_parsers/puppet_strings_module_parser'
+hash = KafoParsers::PuppetStringsModuleParser.parse('/puppet/module/manifests/init.pp')
+```
+
+Output will be similar to PuppetModuleParser, only validations are not supported,
+since they are not parsed by puppet-strings.
+
 # License
 
 This project is licensed under the GPLv3+.
