@@ -23,6 +23,12 @@ module KafoParsers
           Parsers.stub(:all, [parser1]) { Parsers.find_available.must_be_nil }
         end
       end
+
+      specify do
+        parser1.stub(:available?, Proc.new { raise KafoParsers::ParserNotAvailable.new('N/A') } ) do
+          Parsers.stub(:all, [parser1]) { Parsers.find_available.must_be_nil }
+        end
+      end
     end
   end
 end
