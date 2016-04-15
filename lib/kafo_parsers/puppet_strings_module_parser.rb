@@ -24,7 +24,7 @@ module KafoParsers
     end
 
     def self.available?
-      `#{puppet_bin} help strings`
+      `#{puppet_bin} help strings 2>&1`
       if $?.success?
         return true
       else
