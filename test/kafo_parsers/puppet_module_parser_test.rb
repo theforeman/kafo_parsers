@@ -53,7 +53,8 @@ module KafoParsers
           let(:validations) { data[:validations] }
           specify { validations.size.must_equal 1 }
           specify { validations.map(&:name).each { |v| v.must_equal 'validate_string' } }
-          specify { validations.each { |v| v.must_be_kind_of Puppet::Parser::AST::Function } }
+          specify { validations.map(&:arguments).must_equal [['$undocumented']] }
+          specify { validations.each { |v| v.must_be_kind_of KafoParsers::Validation } }
         end
 
         describe "parsed documentation" do
@@ -100,6 +101,28 @@ module KafoParsers
         let(:data) { PuppetModuleParser.parse(ManifestFileFactory.build(manifest).path) }
         let(:parameters) { data[:parameters] }
         specify { parameters.must_include 'version' }
+      end
+
+      describe "parsing complex validations" do
+        let(:manifest) { "class test#{validators.hash}($test) {\n#{validators}\n}\n" }
+        let(:data) { PuppetModuleParser.parse(ManifestFileFactory.build(manifest).path) }
+        let(:validations) { data[:validations] }
+
+        describe "validate_integer" do
+          let(:validators) { %{validate_integer($test, undef, 1)} }
+          specify { validations.size.must_equal 1 }
+          specify { validations.map(&:name).must_equal ['validate_integer'] }
+          specify { validations.map(&:arguments).must_equal [['$test', :undef, '1']] }
+          specify { validations.each { |v| v.must_be_kind_of KafoParsers::Validation } }
+        end
+
+        describe "validate_re" do
+          let(:validators) { %{validate_re($test, ["^mysql$", "^sqlite$"], "invalid $test DB type")} }
+          specify { validations.size.must_equal 1 }
+          specify { validations.map(&:name).must_equal ['validate_re'] }
+          specify { validations.map(&:arguments).must_equal [['$test', ['^mysql$', '^sqlite$'], 'invalid $test DB type']] }
+          specify { validations.each { |v| v.must_be_kind_of KafoParsers::Validation } }
+        end
       end
     end
   end
