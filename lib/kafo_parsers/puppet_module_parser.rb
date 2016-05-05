@@ -45,7 +45,7 @@ module KafoParsers
         else
           Puppet.parse_config
         end
-        Encoding.default_external = Encoding::UTF_8 if defined?(Encoding) && Encoding.respond_to?(:default_external=)
+        Encoding.default_external = Encoding::UTF_8 if defined?(Encoding)
         @@puppet_initialized = true
       end
 
