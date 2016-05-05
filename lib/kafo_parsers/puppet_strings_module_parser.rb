@@ -42,6 +42,7 @@ module KafoParsers
         raise KafoParsers::ParseError, "'#{command}' returned error\n#{@raw_json}"
       end
 
+      Encoding.default_external = Encoding::UTF_8 if defined?(Encoding)
       begin
         @complete_hash = ::JSON.parse(@raw_json)
       rescue ::JSON::ParserError => e
