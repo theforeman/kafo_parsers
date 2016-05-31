@@ -49,7 +49,12 @@ module KafoParsers
         @@puppet_initialized = true
       end
 
-      env = Puppet::Node::Environment.new
+      # if create is available (3.5.0+) we use it to set modulepath, otherwise puppet loads files from pwd
+      if Puppet::Node::Environment.respond_to?(:create)
+        env = Puppet::Node::Environment.create(Puppet.settings.value(:environment), [File.dirname(file)])
+      else
+        env = Puppet::Node::Environment.new
+      end
       parser = Puppet::Parser::Parser.new(env)
       parser.import(@file)
 
