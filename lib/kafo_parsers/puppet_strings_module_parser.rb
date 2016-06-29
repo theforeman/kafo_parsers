@@ -100,7 +100,7 @@ module KafoParsers
         parser             = DocParser.new(@parsed_hash['docstring']).parse
         data[:docs]        = parser.docs
         data[:groups]      = parser.groups
-        data[:types]       = parser.types
+        data[:types]       = merge_doc_types(parser.types)
         data[:conditions]  = parser.conditions
       end
       data
@@ -123,5 +123,10 @@ module KafoParsers
 
       value
     end
+
+    def merge_doc_types(types)
+      Hash[@parsed_hash['signatures'].flatten.map { |param| [ param['name'], param['type'] ] }].merge(types)
+    end
+
   end
 end
