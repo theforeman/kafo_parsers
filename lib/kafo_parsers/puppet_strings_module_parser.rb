@@ -77,7 +77,7 @@ module KafoParsers
     end
 
     def values
-      Hash[@parsed_hash['parameters'].map { |name, value| [ name, sanitize(value) ] }]
+      Hash[@parsed_hash['parameters'].map { |name, value| [ name, value.nil? ? nil : sanitize(value) ] }]
     end
 
     # unsupported in puppet strings parser
