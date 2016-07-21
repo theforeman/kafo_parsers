@@ -15,6 +15,7 @@ BASIC_MANIFEST = <<EOS
 #
 # === Parameters
 #
+# $required::        something without a default value
 # $version::         some version number
 # $sub_version::     some sub version string
 # $documented::      something that is documented but not used
@@ -52,6 +53,7 @@ BASIC_MANIFEST = <<EOS
 # $m_i_a::
 #
 class testing(
+  $required,
   $version = '1.0',
   $sub_version = "beta",
   $undocumented = 'does not have documentation',

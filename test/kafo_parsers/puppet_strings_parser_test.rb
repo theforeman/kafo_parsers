@@ -30,6 +30,7 @@ module KafoParsers
 
         let(:parameters) { data[:parameters] }
         describe 'parsed parameters' do
+          specify { parameters.must_include 'required' }
           specify { parameters.must_include 'version' }
           specify { parameters.must_include 'sub_version' }
           specify { parameters.must_include 'undocumented' }
@@ -43,6 +44,7 @@ module KafoParsers
           it 'includes values for all parameters' do
             parameters.each { |p| values.keys.must_include p }
           end
+          specify { values['required'].must_be_nil }
           specify { values['version'].must_equal '1.0' }
           specify { values['sub_version'].must_equal 'beta' }
           specify { values['undef'].must_equal :undef }
