@@ -79,7 +79,7 @@ module KafoParsers
 
         describe "parsed types" do
           let(:types) { data[:types] }
-          specify { types['version'].must_equal 'string' }
+          specify { types['version'].must_equal 'Any' }
           specify { types['typed'].must_equal 'boolean' }
           specify { types['remote'].must_equal 'boolean' }
         end
