@@ -36,7 +36,7 @@ module KafoParsers
       @file = file
       raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
 
-      command = "#{self.class.puppet_bin} strings #{file} --emit-json-stdout"
+      command = "#{self.class.puppet_bin} strings generate --emit-json-stdout #{file}"
       @raw_json = `#{command}`
       unless $?.success?
         raise KafoParsers::ParseError, "'#{command}' returned error\n#{@raw_json}"
@@ -77,7 +77,11 @@ module KafoParsers
     end
 
     def values
-      Hash[@parsed_hash['parameters'].map { |name, value| [ name, value.nil? ? nil : sanitize(value) ] }]
+      Hash[
+        # combine known parameters (from tags) with any defaults provided
+        tag_params.select { |param| !param['types'].nil? }.map { |param| [ param['name'], nil ] } +
+          @parsed_hash.fetch('defaults', {}).map { |name, value| [ name, value.nil? ? nil : sanitize(value) ] }
+      ]
     end
 
     # unsupported in puppet strings parser
@@ -96,8 +100,8 @@ module KafoParsers
       data = { :docs => {}, :types => {}, :groups => {}, :conditions => {} }
       if @parsed_hash.nil?
         raise KafoParsers::DocParseError, "no documentation found for manifest #{@file}, parsing error?"
-      elsif !@parsed_hash['docstring'].nil?
-        parser             = DocParser.new(@parsed_hash['docstring']).parse
+      elsif !@parsed_hash['docstring'].nil? && !@parsed_hash['docstring']['text'].nil?
+        parser             = DocParser.new(@parsed_hash['docstring']['text']).parse
         data[:docs]        = parser.docs
         data[:groups]      = parser.groups
         data[:types]       = merge_doc_types(parser.types)
@@ -125,7 +129,15 @@ module KafoParsers
     end
 
     def merge_doc_types(types)
-      Hash[@parsed_hash['signatures'].flatten.map { |param| [ param['name'], param['type'] ] }].merge(types)
+      Hash[tag_params.select { |param| !param['types'].nil? }.map { |param| [ param['name'], param['types'].first ] }].merge(types)
+    end
+
+    def tag_params
+      if @parsed_hash['docstring']['tags']
+        @parsed_hash['docstring']['tags'].select { |tag| tag['tag_name'] == 'param' }
+      else
+        []
+      end
     end
 
   end
