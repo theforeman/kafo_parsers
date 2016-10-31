@@ -101,6 +101,13 @@ module KafoParsers
         let(:parameters) { data[:parameters] }
         specify { parameters.must_include 'version' }
       end
+
+      describe 'with no class parameters' do
+        let(:manifest) { "class testing { }" }
+        let(:data) { PuppetStringsModuleParser.parse(ManifestFileFactory.build(manifest).path) }
+        let(:parameters) { data[:parameters] }
+        specify { parameters.must_equal [] }
+      end
     end
   end
 end

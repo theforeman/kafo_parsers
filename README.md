@@ -60,7 +60,9 @@ Add `gem 'puppet', '< 4'` to your application's Gemfile to use this.
 #### PuppetStringsModuleParser
 
 If you use Puppet 4 you prefer PuppetStringsModuleParser which leverages
-puppet-strings to parse puppet manifests.
+puppet-strings to parse puppet manifests. This requires puppet-strings 0.99 or
+higher and may be installed either as a gem in the same environment, or in a
+Puppet AIO installation.
 
 ```ruby
 require 'kafo_parsers/puppet_strings_module_parser'

@@ -14,5 +14,5 @@ puppet_spec = puppet_version ? "~> #{puppet_version}" : '< 5.0.0'
 gem 'puppet', puppet_spec
 
 if puppet_version.nil? || (puppet_version >= '3.7' && RUBY_VERSION >= '1.9')
-  gem 'puppet-strings'
+  gem 'puppet-strings', '>= 0.99', '< 2'
 end
