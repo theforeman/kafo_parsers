@@ -60,7 +60,7 @@ module KafoParsers
           binary = File.join(path, 'puppet')
           binary if File.executable?(binary)
         end
-        File.join(found_puppet_path, 'puppet') || 'puppet'
+        found_puppet_path.nil? ? 'puppet' : File.join(found_puppet_path, 'puppet')
       end
     end
 
