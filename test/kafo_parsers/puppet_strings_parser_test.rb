@@ -108,6 +108,16 @@ module KafoParsers
         let(:parameters) { data[:parameters] }
         specify { parameters.must_equal [] }
       end
+
+      describe 'with relative path' do
+        let(:manifest) { BASIC_MANIFEST.sub('class testing(', 'class relative(') }
+        let(:data) do
+          path = Pathname.new(ManifestFileFactory.build(manifest).path).relative_path_from(Pathname.new(Dir.pwd))
+          PuppetStringsModuleParser.parse(path.to_s)
+        end
+        let(:parameters) { data[:parameters] }
+        specify { parameters.must_include 'version' }
+      end
     end
   end
 end

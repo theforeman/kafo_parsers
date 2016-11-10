@@ -37,7 +37,7 @@ module KafoParsers
     def initialize(file)
       called_before_each_test = false
 
-      @file = file
+      @file = file = File.expand_path(file)
       raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
 
       unless @@puppet_initialized
