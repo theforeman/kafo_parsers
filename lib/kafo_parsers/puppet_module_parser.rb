@@ -35,18 +35,29 @@ module KafoParsers
     end
 
     def initialize(file)
+      called_before_each_test = false
+
       @file = file
       raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
 
       unless @@puppet_initialized
         require 'puppet'
         if Puppet::PUPPETVERSION.to_i >= 3
-          Puppet.initialize_settings
+          require 'puppet/test/test_helper'
+          if Puppet::Test::TestHelper.respond_to?(:initialize) # 3.1+
+            Puppet::Test::TestHelper.initialize
+          end
+          Puppet::Test::TestHelper.before_all_tests
         else
           Puppet.parse_config
         end
         Encoding.default_external = Encoding::UTF_8 if defined?(Encoding)
         @@puppet_initialized = true
+      end
+
+      if Puppet::PUPPETVERSION.to_i >= 3
+        Puppet::Test::TestHelper.before_each_test
+        called_before_each_test = true
       end
 
       env = Puppet::Node::Environment.new
@@ -64,6 +75,8 @@ module KafoParsers
       end
 
       parser
+    ensure
+      Puppet::Test::TestHelper.after_each_test if called_before_each_test
     end
 
     # TODO - store parsed object type (Puppet::Parser::AST::Variable must be dumped later)
