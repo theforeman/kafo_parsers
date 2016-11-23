@@ -33,7 +33,7 @@ module KafoParsers
     end
 
     def initialize(file)
-      @file = file
+      @file = file = File.expand_path(file)
       raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
 
       command = "#{self.class.puppet_bin} strings generate --emit-json-stdout #{file}"
