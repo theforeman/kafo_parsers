@@ -51,6 +51,7 @@ BASIC_MANIFEST = <<EOS
 # === Extra parameters
 #
 # $log_level::       we can get up in levels
+# $variable::        set in a params class
 # $m_i_a::
 #
 class testing(
@@ -69,6 +70,7 @@ class testing(
   $username = 'root',
   $password = 'toor',
   $file = undef,
+  $variable = $::testing::params::variable,
   $m_i_a = 'test') {
 
   validate_string($undocumented)

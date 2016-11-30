@@ -49,6 +49,7 @@ module KafoParsers
           specify { values['sub_version'].must_equal 'beta' }
           specify { values['undef'].must_equal :undef }
           specify { values['debug'].must_equal 'true' }
+          specify { values['variable'].must_equal '$::testing::params::variable' }
         end
 
         describe "parsed validations are not supported" do
