@@ -110,7 +110,7 @@ module KafoParsers
         parser             = DocParser.new(@object.doc).parse
         data[:docs]        = parser.docs
         data[:groups]      = parser.groups
-        data[:types]       = parser.types
+        data[:types]       = Hash.new('string').merge(parser.types)
         data[:conditions]  = parser.conditions
         data[:object_type] = @object.type.to_s
       end

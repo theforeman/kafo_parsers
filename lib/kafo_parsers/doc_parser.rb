@@ -3,6 +3,7 @@ require 'rdoc'
 require 'rdoc/markup' # required for RDoc < 0.9.5
 require 'rdoc/markup/parser' # required for RDoc < 0.9.5
 require 'kafo_parsers/exceptions'
+require 'kafo_parsers/param_doc_parser'
 
 module KafoParsers
   class DocParser
@@ -15,7 +16,7 @@ module KafoParsers
       @docs           = {}
       @groups         = {}
       @conditions     = {}
-      @types          = Hash.new('string')
+      @types          = {}
       @rdoc           = rdoc_parser.parse(@text)
     end
 
@@ -46,34 +47,17 @@ module KafoParsers
       return if label.nil?
       key              = label.gsub(/[^A-Za-z0-9_-]/, '')
       @groups[key]     = current_groups
-      text_parts       = para.parts.first.parts.map!(&:strip)
-      attributes, docs = text_parts.partition { |line| line =~ ATTRIBUTE_LINE }
-      parse_attributes(key, attributes)
-      @docs[key] = docs
+      text_parts       = para.parts.first.parts
+
+      param_parser = ParamDocParser.new(key, text_parts)
+      @docs[key] = param_parser.doc
+      parse_attributes(key, param_parser)
     end
 
-    def parse_attributes(parameter, attributes)
-      condition = nil
-      attributes.each do |attribute|
-        data        = attribute.match(ATTRIBUTE_LINE)
-        name, value = data[1], data[2]
-
-        case name
-          when 'type'
-            @types[parameter] = value
-          when 'condition'
-            if condition.nil?
-              condition = value
-            else
-              raise KafoParsers::DocParseError, "Two or more conditions defined for #{name}"
-            end
-          else
-            raise KafoParsers::DocParseError, "Unknown attribute #{name}"
-        end
-
-      end
-      condition              = [current_condition, condition].compact.join(' && ')
+    def parse_attributes(parameter, parser)
+      condition              = [current_condition, parser.condition].compact.join(' && ')
       @conditions[parameter] = condition.empty? ? nil : condition
+      @types[parameter]      = parser.type unless parser.type.nil?
     end
 
     def parse_header(heading)
