@@ -1,6 +1,7 @@
 # encoding: UTF-8
 require 'json'
 require 'kafo_parsers/doc_parser'
+require 'kafo_parsers/param_doc_parser'
 
 module KafoParsers
   class PuppetStringsModuleParser
@@ -91,7 +92,7 @@ module KafoParsers
 
     # returns data in following form
     # {
-    #   :docs => { $param1 => 'documentation without types and conditions'}
+    #   :docs => { $param1 => ['documentation without types and conditions']}
     #   :types => { $param1 => 'boolean'},
     #   :groups => { $param1 => ['Parameters', 'Advanced']},
     #   :conditions => { $param1 => '$db_type == "mysql"'},
@@ -101,11 +102,29 @@ module KafoParsers
       if @parsed_hash.nil?
         raise KafoParsers::DocParseError, "no documentation found for manifest #{@file}, parsing error?"
       elsif !@parsed_hash['docstring'].nil? && !@parsed_hash['docstring']['text'].nil?
-        parser             = DocParser.new(@parsed_hash['docstring']['text']).parse
-        data[:docs]        = parser.docs
-        data[:groups]      = parser.groups
-        data[:types]       = merge_doc_types(parser.types)
-        data[:conditions]  = parser.conditions
+        # Lowest precedence: types given in the strings hash from class definition
+        tag_params.each do |param|
+          data[:types][param['name']] = param['types'][0] unless param['types'].nil?
+        end
+
+        # Next: types and other data from RDoc parser
+        rdoc_parser = DocParser.new(@parsed_hash['docstring']['text']).parse
+        data[:docs] = rdoc_parser.docs
+        data[:groups] = rdoc_parser.groups
+        data[:conditions] = rdoc_parser.conditions
+        data[:types].merge! rdoc_parser.types
+
+        # Highest precedence: data in YARD @param stored in the 'text' field
+        tag_params.each do |param|
+          param_name = param['name']
+          unless param['text'].nil? || param['text'].empty?
+            param_parser = ParamDocParser.new(param_name, param['text'].split($/))
+            data[:docs][param_name] = param_parser.doc if param_parser.doc
+            data[:groups][param_name] = param_parser.group if param_parser.group
+            data[:conditions][param_name] = param_parser.condition if param_parser.condition
+            data[:types][param_name] = param_parser.type if param_parser.type
+          end
+        end
       end
       data
     end
@@ -124,10 +143,6 @@ module KafoParsers
       value = :undef if value == 'undef'
 
       value
-    end
-
-    def merge_doc_types(types)
-      Hash[tag_params.select { |param| !param['types'].nil? }.map { |param| [ param['name'], param['types'].first ] }].merge(types)
     end
 
     def tag_params

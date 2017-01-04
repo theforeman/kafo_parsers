@@ -72,6 +72,86 @@ hash = KafoParsers::PuppetStringsModuleParser.parse('/puppet/module/manifests/in
 Output will be similar to PuppetModuleParser, only validations are not supported,
 since they are not parsed by puppet-strings.
 
+## Documentation syntax
+
+### RDoc syntax
+
+Classes and defined types should be prefixed with a comment section with an RDoc
+block, containing a description, headings for different parameter groups and
+parameters laid out as shown below:
+
+```puppet
+# Example class that installs Example
+#
+# Supports version 1 to 3.
+#
+# === Parameters::
+#
+# $foo::  Sets the value of foo in the Example config
+#
+# === Advanced parameters::
+#
+# $bar::  Sets the value of bar in the advanced config
+```
+
+Parameters may have multi-line descriptions and can have extra attributes
+defined on new lines below them. Supports:
+
+```puppet
+# $foo::  Sets the value of foo in the Example config
+#         condition: $bar == 'use_foo'
+#         type: Optional[String]
+```
+
+Supports:
+
+* `condition:` an expression to determine if the parameter is used
+* `type:` the data type of the parameter
+
+Used by:
+
+* `PuppetModuleParser`
+* `PuppetStringsModuleParser` (but deprecated, prefer YARD)
+
+### YARD syntax
+
+Classes and defined types should be prefixed with a comment section in YARD
+following the Puppet Strings documentation standard, as shown below:
+
+```puppet
+# Example class that installs Example
+#
+# Supports version 1 to 3.
+#
+# @param foo Sets the value of foo in the Example config
+# @param bar Sets the value of bar in the advanced config
+#            group: Advanced parameters
+```
+
+Parameters may have multi-line descriptions and can have extra attributes
+defined on new lines below them. Supports:
+
+```puppet
+# @param foo Sets the value of foo in the Example config
+#            condition: $bar == 'use_foo'
+```
+
+Supports:
+
+* `condition:` an expression to determine if the parameter is used
+* `group:` comma-separated list of groups, increasing in specificity
+
+Data types are given in the parameter list of the class, or can be given inline
+for Puppet 3 compatibility:
+
+```puppet
+# @param foo [Integer] Sets the value of foo in the Example config
+```
+
+Used by:
+
+* `PuppetStringsModuleParser`
+
 # License
 
 This project is licensed under the GPLv3+.

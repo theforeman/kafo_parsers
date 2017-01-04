@@ -87,6 +87,75 @@ EOS
 
 DEFINITION_MANIFEST = BASIC_MANIFEST.sub('class testing(', 'define testing2(')
 
+BASIC_YARD_MANIFEST = <<EOS
+# This manifests is used for testing
+#
+# It has no value except of covering use cases that we must test.
+#
+# @param required            something without a default value
+# @param version             some version number
+# @param sub_version         some sub version string
+# @param documented          something that is documented but not used
+# @param undef               default is undef
+# @param multiline           param with multiline
+#                            documentation
+#                            consisting of 3 lines
+# @param typed [boolean]     something having its type explicitly set
+# @param multivalue [array]  list of users
+# @param m_i_a
+#
+# @param debug [boolean]     we have advanced parameter, yay!
+#                            group:Advanced parameters
+# @param db_type             can be mysql or sqlite
+#                            group:Advanced parameters
+#
+# @param remote [boolean]    socket or remote connection
+#                            group: Advanced parameters, MySQL
+# @param server              hostname
+#                            condition: $remote
+#                            group: Advanced parameters, MySQL
+# @param username            username
+#                            group: Advanced parameters, MySQL
+# @param password [password] condition:$username != 'root'
+#                            group: Advanced parameters, MySQL
+#
+# @param file                filename
+#                            group: Advanced parameters, Sqlite
+#
+# @param log_level           we can get up in levels
+#                            group: Extra parameters
+#
+class testing(
+  String $required,
+  Any $version = '1.0',
+  String $sub_version = "beta",
+  String $undocumented = 'does not have documentation',
+  Optional[Integer] $undef = undef,
+  Optional[String] $multiline = undef,
+  $typed = true,
+  $multivalue = ['x', 'y'],
+  $debug = true,
+  Enum['mysql', 'sqlite'] $db_type = 'mysql',
+  $remote = true,
+  String $server = 'mysql.example.com',
+  String $username = 'root',
+  $password = 'toor',
+  Optional[String] $file = undef,
+  String $variable = $::testing::params::variable,
+  String $m_i_a = 'test') {
+
+  validate_string($undocumented)
+  if $version == '1.0' {
+    # this must be ignored since we can't evaluate conditions
+    validate_bool($undef)
+  }
+
+  package {"testing":
+    ensure => present
+  }
+}
+EOS
+
 class Minitest::Spec
   before do
 
