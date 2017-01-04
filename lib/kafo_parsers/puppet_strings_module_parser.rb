@@ -113,7 +113,6 @@ module KafoParsers
     private
 
     # default values using puppet strings includes $ symbol, e.g. "$::foreman::params::ssl"
-    # to keep the same API we strip $ if it's present
     #
     # values are reported as strings which is issue especially for :under
     # strings are double quoted
@@ -122,7 +121,6 @@ module KafoParsers
       if (value.start_with?("'") && value.end_with?("'")) || (value.start_with?('"') && value.end_with?('"'))
         value = value[1..-2]
       end
-      value = value[1..-1] if value.start_with?('$')
       value = :undef if value == 'undef'
 
       value

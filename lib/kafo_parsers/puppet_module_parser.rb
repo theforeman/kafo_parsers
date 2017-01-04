@@ -83,14 +83,14 @@ module KafoParsers
     def values
       parameters = {}
       arguments  = @object.respond_to?(:arguments) ? @object.arguments : {}
-      arguments.each { |k, v| parameters[k] = v.respond_to?(:value) ? v.value : nil }
+      arguments.each { |k, v| parameters[k] = interpret_ast([v])[0] }
       parameters
     end
 
     def validations(param = nil)
       return [] if @object.code.nil?
       @object.code.select { |stmt| stmt.is_a?(Puppet::Parser::AST::Function) && stmt.name =~ /^validate_/ }.map do |v|
-        Validation.new(v.name, interpret_validation_args(v.arguments))
+        Validation.new(v.name, interpret_ast(v.arguments))
       end
     end
 
@@ -119,14 +119,14 @@ module KafoParsers
 
     private
 
-    def interpret_validation_args(args)
+    def interpret_ast(args)
       args.map do |arg|
         if arg.is_a?(Puppet::Parser::AST::Variable)
           arg.to_s
         elsif arg.is_a?(Puppet::Parser::AST::ASTArray)
-          interpret_validation_args(arg.to_a)
+          interpret_ast(arg.to_a)
         elsif arg.is_a?(Puppet::Parser::AST::Concat)
-          interpret_validation_args(arg.value).join
+          interpret_ast(arg.value).join
         elsif arg.respond_to? :value
           arg.value
         else
