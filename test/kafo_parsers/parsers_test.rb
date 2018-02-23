@@ -8,7 +8,7 @@ module KafoParsers
     end
 
     describe ".find_available" do
-      let(:parser1) { PuppetModuleParser }
+      let(:parser1) { PuppetStringsModuleParser }
 
       specify { Parsers.stub(:all, []) { Parsers.find_available.must_be_nil } }
 
