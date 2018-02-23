@@ -35,7 +35,7 @@ module KafoParsers
 
     def initialize(file)
       @file = file = File.expand_path(file)
-      raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exists?(file)
+      raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exist?(file)
 
       command = "#{self.class.puppet_bin} strings generate --emit-json-stdout #{file}"
       @raw_json = `#{command}`
@@ -43,7 +43,6 @@ module KafoParsers
         raise KafoParsers::ParseError, "'#{command}' returned error\n#{@raw_json}"
       end
 
-      Encoding.default_external = Encoding::UTF_8 if defined?(Encoding)
       begin
         @complete_hash = ::JSON.parse(@raw_json)
       rescue ::JSON::ParserError => e
