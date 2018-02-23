@@ -44,33 +44,20 @@ KafoParsers::Parsers.find_available(:logger => logger)
 
 To load a specific parser:
 ```ruby
-require 'kafo_parsers/puppet_module_parser'
-hash = KafoParsers::PuppetModuleParser.parse('/puppet/module/manifests/init.pp')
+require 'kafo_parsers/puppet_strings_module_parser'
+hash = KafoParsers::PuppetStringsModuleParser.parse('/puppet/module/manifests/init.pp')
 ```
-
-#### PuppetModuleParser
-
-The standard PuppetModuleParser loads Puppet as a regular library or gem, so it
-must be installed in the same Ruby that's running kafo_parsers.
-
-Only Puppet versions 2.6.x, 2.7.x and 3.x are supported.
-
-Add `gem 'puppet', '< 4'` to your application's Gemfile to use this.
 
 #### PuppetStringsModuleParser
 
-If you use Puppet 4 you prefer PuppetStringsModuleParser which leverages
-puppet-strings to parse puppet manifests. This requires puppet-strings 0.99 or
-higher and may be installed either as a gem in the same environment, or in a
-Puppet AIO installation.
+Leverage puppet-strings to parse puppet manifests. This requires puppet-strings
+0.99 or higher and may be installed either as a gem in the same environment, or
+in a Puppet AIO installation.
 
 ```ruby
 require 'kafo_parsers/puppet_strings_module_parser'
 hash = KafoParsers::PuppetStringsModuleParser.parse('/puppet/module/manifests/init.pp')
 ```
-
-Output will be similar to PuppetModuleParser, only validations are not supported,
-since they are not parsed by puppet-strings.
 
 ## Documentation syntax
 
@@ -110,7 +97,6 @@ Supports:
 
 Used by:
 
-* `PuppetModuleParser`
 * `PuppetStringsModuleParser` (but deprecated, prefer YARD)
 
 ### YARD syntax
