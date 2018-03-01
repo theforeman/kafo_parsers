@@ -51,8 +51,8 @@ hash = KafoParsers::PuppetStringsModuleParser.parse('/puppet/module/manifests/in
 #### PuppetStringsModuleParser
 
 Leverage puppet-strings to parse puppet manifests. This requires puppet-strings
-0.99 or higher and may be installed either as a gem in the same environment, or
-in a Puppet AIO installation.
+1.2.0 or higher and may be installed either as a gem in the same environment,
+or in a Puppet AIO installation.
 
 ```ruby
 require 'kafo_parsers/puppet_strings_module_parser'

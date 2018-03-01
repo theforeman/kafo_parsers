@@ -7,4 +7,4 @@ gem 'rdoc', '< 6.0.0' if RUBY_VERSION < '2.2'
 
 puppet_version = ENV['PUPPET_VERSION'] || '5.0'
 gem 'puppet', "~> #{puppet_version}"
-gem 'puppet-strings', '>= 0.99', '< 2'
+gem 'puppet-strings', '>= 1.2.0', '< 3'
