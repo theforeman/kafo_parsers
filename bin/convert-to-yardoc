@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require 'kafo_parsers/parsers'
+
+parser = KafoParsers::Parsers.find_available
+ARGV.each do |filename|
+  parsed = parser.parse(filename)
+  if parsed
+    puts "Converting #{filename}"
+    File.open(filename, 'w') do |file|
+      parsed[:parameters].each do |param|
+        file.puts "# @param #{param}\n"
+        (parsed[:docs][param] || []).each do |doc|
+          file.puts "#   #{doc}\n"
+        end
+      end
+      file.puts parsed[:source]
+    end
+  else
+    puts "Failed to parse #{filename}"
+  end
+end
