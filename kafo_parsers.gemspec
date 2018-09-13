@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{Puppet module parsers}
   spec.description   = %q{This gem can parse values, validations, documentation, types, groups and conditions of parameters from your puppet modules}
   spec.homepage      = "https://github.com/theforeman/kafo_parsers"
-  spec.license       = "GPLv3+"
+  spec.license       = "GPL-3.0-or-later"
 
   spec.files         = `git ls-files`.split($/)
   spec.files         = Dir['lib/**/*'] + ['LICENSE.txt', 'Rakefile', 'README.md']
