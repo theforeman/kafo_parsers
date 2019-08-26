@@ -1,6 +1,6 @@
 # KafoParsers
 
-This gem can parse values, validations, documentation, types, groups and
+This gem can parse values, documentation, types, groups and
 conditions of parameters from your puppet modules. Only thing you have
 to do is provide a path to manifest file you want to be parsed.
 

@@ -19,7 +19,6 @@ module KafoParsers
           describe 'data structure' do
             let(:keys) { data.keys }
             specify { _(keys).must_include :values }
-            specify { _(keys).must_include :validations }
             specify { _(keys).must_include :docs }
             specify { _(keys).must_include :parameters }
             specify { _(keys).must_include :types }
@@ -56,11 +55,6 @@ module KafoParsers
             specify { _(values['mapped']).must_equal({'apples' => 'oranges', 'unquoted' => :undef}) }
             specify { _(values['debug']).must_equal 'true' }
             specify { _(values['variable']).must_equal '$::testing::params::variable' }
-          end
-
-          describe "parsed validations are not supported" do
-            let(:validations) { data[:validations] }
-            specify { _(validations).must_be_empty }
           end
 
           describe "parsed documentation" do
