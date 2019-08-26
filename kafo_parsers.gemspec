@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Marek Hulan"]
   spec.email         = ["mhulan@redhat.com"]
   spec.summary       = %q{Puppet module parsers}
-  spec.description   = %q{This gem can parse values, validations, documentation, types, groups and conditions of parameters from your puppet modules}
+  spec.description   = %q{This gem can parse values, documentation, types, groups and conditions of parameters from your puppet modules}
   spec.homepage      = "https://github.com/theforeman/kafo_parsers"
   spec.license       = "GPL-3.0+"
 

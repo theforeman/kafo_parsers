@@ -10,16 +10,14 @@ module KafoParsers
     # You can call this method to get all supported information from a given manifest
     #
     # @param [ String ] manifest file path to parse
-    # @return [ Hash ] hash containing values, validations, documentation, types, groups and conditions
+    # @return [ Hash ] hash containing values, documentation, types, groups and conditions
     def self.parse(file)
       content = new(file)
       docs    = content.docs
 
-      # data_type must be called before other validations
       data = {
         :object_type => content.data_type,
         :values      => content.values,
-        :validations => content.validations
       }
       data[:parameters] = data[:values].keys
       data.merge!(docs)
@@ -85,11 +83,6 @@ module KafoParsers
         tag_params.select { |param| !param['types'].nil? }.map { |param| [ param['name'], nil ] } +
           @parsed_hash.fetch('defaults', {}).map { |name, value| [ name, value.nil? ? nil : sanitize(value) ] }
       ]
-    end
-
-    # unsupported in puppet strings parser
-    def validations(param = nil)
-      []
     end
 
     # returns data in following form
