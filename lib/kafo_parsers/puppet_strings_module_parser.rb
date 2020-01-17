@@ -55,8 +55,14 @@ module KafoParsers
 
     # AIO and system default puppet bins are tested for existence, fallback to just `puppet` otherwise
     def self.puppet_bin
+      bin_dir = if File.exist?('/opt/theforeman/tfm/root/usr/bin')
+                  '/opt/theforeman/tfm/root/usr/bin'
+                else
+                  '/opt/puppetlabs/bin'
+                end
+
       @puppet_bin ||= begin
-        found_puppet_path = (::ENV['PATH'].split(File::PATH_SEPARATOR) + ['/opt/puppetlabs/bin']).find do |path|
+        found_puppet_path = (::ENV['PATH'].split(File::PATH_SEPARATOR) + [bin_dir]).find do |path|
           binary = File.join(path, 'puppet')
           binary if File.executable?(binary)
         end
