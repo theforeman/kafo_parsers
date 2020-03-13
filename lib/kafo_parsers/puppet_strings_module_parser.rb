@@ -1,5 +1,7 @@
 # encoding: UTF-8
 require 'json'
+require 'open3'
+
 require 'kafo_parsers/doc_parser'
 require 'kafo_parsers/param_doc_parser'
 
@@ -25,11 +27,11 @@ module KafoParsers
     end
 
     def self.available?
-      `#{puppet_bin} help strings 2>&1`
-      if $?.success?
+      _stdout, _stderr, status = run_puppet(['help', 'strings'])
+      if status.success?
         return true
       else
-        raise KafoParsers::ParserNotAvailable.new("#{puppet_bin} does not have strings module installed")
+        raise KafoParsers::ParserNotAvailable.new("#{puppet_bin} does not have strings module installed.")
       end
     end
 
@@ -37,10 +39,11 @@ module KafoParsers
       @file = file = File.expand_path(file)
       raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exist?(file)
 
-      command = "#{self.class.puppet_bin} strings generate --format json #{file}"
-      @raw_json = `#{command}`
-      unless $?.success?
-        raise KafoParsers::ParseError, "'#{command}' returned error\n#{@raw_json}"
+      command = ['strings', 'generate', '--format', 'json', file]
+      @raw_json, stderr, status = self.class.run_puppet(command)
+
+      unless status.success?
+        raise KafoParsers::ParseError, "'#{command}' returned error:\n  #{@raw_json}\n  #{stderr}"
       end
 
       begin
@@ -129,6 +132,22 @@ module KafoParsers
     end
 
     private
+
+    def self.run_puppet(command)
+      env_vars = self.puppet_bin.start_with?('/opt/puppetlabs') ? clean_env_vars : ::ENV
+      command = command.unshift(self.puppet_bin)
+      Open3.capture3(env_vars, *command, :unsetenv_others => true)
+    end
+
+    def self.clean_env_vars
+      # Cleaning ENV vars and keeping required vars only because,
+      # When using SCL it adds GEM_HOME and GEM_PATH ENV vars.
+      whitelisted_vars = %w[HOME USER LANG]
+
+      cleaned_env = ::ENV.select { |var| whitelisted_vars.include?(var) || var.start_with?('LC_') }
+      cleaned_env['PATH'] = '/sbin:/bin:/usr/sbin:/usr/bin:/opt/puppetlabs/bin'
+      cleaned_env
+    end
 
     # default values using puppet strings includes $ symbol, e.g. "$::foreman::params::ssl"
     #
