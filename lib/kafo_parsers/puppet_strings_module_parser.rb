@@ -56,17 +56,15 @@ module KafoParsers
       self
     end
 
-    def self.puppet_bin
-      @puppet_bin ||= self.find_puppet_bin
-    end
-
     # AIO and system default puppet bins are tested for existence, fallback to just `puppet` otherwise
-    def self.find_puppet_bin
-      found_puppet_path = (::ENV['PATH'].split(File::PATH_SEPARATOR) + ['/opt/puppetlabs/bin']).find do |path|
-        binary = File.join(path, 'puppet')
-        binary if File.executable?(binary) && !File.symlink?(binary)
+    def self.puppet_bin
+      @puppet_bin ||= begin
+        found_puppet_path = (::ENV['PATH'].split(File::PATH_SEPARATOR) + ['/opt/puppetlabs/bin']).find do |path|
+          binary = File.join(path, 'puppet')
+          binary if File.executable?(binary)
+        end
+        found_puppet_path.nil? ? 'puppet' : File.join(found_puppet_path, 'puppet')
       end
-      found_puppet_path.nil? ? 'puppet' : File.join(found_puppet_path, 'puppet')
     end
 
     def data_type
