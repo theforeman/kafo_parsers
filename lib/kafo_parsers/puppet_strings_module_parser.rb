@@ -7,23 +7,17 @@ require 'kafo_parsers/param_doc_parser'
 
 module KafoParsers
   class PuppetStringsModuleParser
+    STRINGS_TYPE_MAP = {
+      'hostclass' => 'puppet_classes',
+      'definition' => 'defined_types',
+    }
+
     # You can call this method to get all supported information from a given manifest
     #
     # @param [ String ] manifest file path to parse
     # @return [ Hash ] hash containing values, validations, documentation, types, groups and conditions
     def self.parse(file)
-      content = new(file)
-      docs    = content.docs
-
-      # data_type must be called before other validations
-      data = {
-        :object_type => content.data_type,
-        :values      => content.values,
-        :validations => content.validations
-      }
-      data[:parameters] = data[:values].keys
-      data.merge!(docs)
-      data
+      new([file]).by_file(file)
     end
 
     def self.available?
@@ -35,11 +29,10 @@ module KafoParsers
       end
     end
 
-    def initialize(file)
-      @file = file = File.expand_path(file)
-      raise KafoParsers::ModuleName, "File not found #{file}, check your answer file" unless File.exist?(file)
+    def initialize(paths)
+      paths = paths.map { |path| File.expand_path(path) }
 
-      command = ['strings', 'generate', '--format', 'json', file]
+      command = ['strings', 'generate', '--format', 'json'] + paths
       @raw_json, stderr, status = self.class.run_puppet(command)
 
       unless status.success?
@@ -51,9 +44,20 @@ module KafoParsers
       rescue ::JSON::ParserError => e
         raise KafoParsers::ParseError, "'#{command}' returned invalid json output: #{e.message}\n#{@raw_json}"
       end
-      self.data_type # we need to determine data_type before any further parsing
 
-      self
+      if STRINGS_TYPE_MAP.values.all? { |key| @complete_hash[key].empty? }
+        raise KafoParsers::ModuleName, "Nothing found in #{paths.join(',')}"
+      end
+    end
+
+    def by_file(file)
+      data_type, parsed_hash = find_by_property('file', File.expand_path(file))
+      format_result(data_type, parsed_hash)
+    end
+
+    def by_name(name)
+      data_type, parsed_hash = find_by_property('name', name)
+      format_result(data_type, parsed_hash)
     end
 
     # AIO and system default puppet bins are tested for existence, fallback to just `puppet` otherwise
@@ -67,29 +71,17 @@ module KafoParsers
       end
     end
 
-    def data_type
-      @data_type ||= begin
-        if (@parsed_hash = @complete_hash['puppet_classes'].find { |klass| klass['file'] == @file })
-          'hostclass'
-        elsif (@parsed_hash = @complete_hash['defined_types'].find { |klass| klass['file'] == @file })
-          'definition'
-        else
-          raise KafoParsers::ParseError, "unable to find manifest data, syntax error in manifest #{@file}?"
-        end
-      end
-    end
+    private
 
-    def values
-      Hash[
-        # combine known parameters (from tags) with any defaults provided
-        tag_params.select { |param| !param['types'].nil? }.map { |param| [ param['name'], nil ] } +
-          @parsed_hash.fetch('defaults', {}).map { |name, value| [ name, value.nil? ? nil : sanitize(value) ] }
-      ]
-    end
-
-    # unsupported in puppet strings parser
-    def validations(param = nil)
-      []
+    def format_result(data_type, parsed_hash)
+      data = {
+        :object_type => data_type,
+        :values      => values_for_parsed_hash(parsed_hash),
+        :validations => [],
+      }
+      data[:parameters] = data[:values].keys
+      data.merge!(docs_for_parsed_hash(parsed_hash))
+      data
     end
 
     # returns data in following form
@@ -99,25 +91,24 @@ module KafoParsers
     #   :groups => { $param1 => ['Parameters', 'Advanced']},
     #   :conditions => { $param1 => '$db_type == "mysql"'},
     # }
-    def docs
+    def docs_for_parsed_hash(parsed_hash)
       data = { :docs => {}, :types => {}, :groups => {}, :conditions => {} }
-      if @parsed_hash.nil?
-        raise KafoParsers::DocParseError, "no documentation found for manifest #{@file}, parsing error?"
-      elsif !@parsed_hash['docstring'].nil? && !@parsed_hash['docstring']['text'].nil?
+
+      if parsed_hash.dig('docstring', 'text')
         # Lowest precedence: types given in the strings hash from class definition
-        tag_params.each do |param|
+        tag_params(parsed_hash).each do |param|
           data[:types][param['name']] = param['types'][0] unless param['types'].nil?
         end
 
         # Next: types and other data from RDoc parser
-        rdoc_parser = DocParser.new(@parsed_hash['docstring']['text']).parse
+        rdoc_parser = DocParser.new(parsed_hash['docstring']['text']).parse
         data[:docs] = rdoc_parser.docs
         data[:groups] = rdoc_parser.groups
         data[:conditions] = rdoc_parser.conditions
         data[:types].merge! rdoc_parser.types
 
         # Highest precedence: data in YARD @param stored in the 'text' field
-        tag_params.each do |param|
+        tag_params(parsed_hash).each do |param|
           param_name = param['name']
           unless param['text'].nil? || param['text'].empty?
             param_parser = ParamDocParser.new(param_name, param['text'].split($/))
@@ -131,7 +122,23 @@ module KafoParsers
       data
     end
 
-    private
+    def values_for_parsed_hash(parsed_hash)
+      Hash[
+        # combine known parameters (from tags) with any defaults provided
+        tag_params(parsed_hash).select { |param| !param['types'].nil? }.map { |param| [ param['name'], nil ] } +
+          parsed_hash.fetch('defaults', {}).map { |name, value| [ name, value.nil? ? nil : sanitize(value) ] }
+      ]
+    end
+
+    def find_by_property(property, value)
+      STRINGS_TYPE_MAP.each do |data_type, key|
+        if (parsed_hash = @complete_hash[key].find { |klass| klass[property] == value })
+          return [data_type, parsed_hash]
+        end
+      end
+
+      raise KafoParsers::ParseError, "unable to find manifest data, syntax error in manifest #{file}?"
+    end
 
     def self.search_puppet_path(bin_name)
       # Find the location of the puppet executable and use that to
@@ -194,9 +201,9 @@ module KafoParsers
       value
     end
 
-    def tag_params
-      if @parsed_hash['docstring']['tags']
-        @parsed_hash['docstring']['tags'].select { |tag| tag['tag_name'] == 'param' }
+    def tag_params(parsed_hash)
+      if parsed_hash['docstring']['tags']
+        parsed_hash['docstring']['tags'].select { |tag| tag['tag_name'] == 'param' }
       else
         []
       end
