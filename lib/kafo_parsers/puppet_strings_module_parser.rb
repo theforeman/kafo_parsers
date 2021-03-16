@@ -133,10 +133,30 @@ module KafoParsers
 
     private
 
+    def self.search_puppet_path(bin_name)
+      # Find the location of the puppet executable and use that to
+      # determine the path of all executables
+      bin_path = (::ENV['PATH'].split(File::PATH_SEPARATOR) + ['/opt/puppetlabs/bin']).find do |path|
+        File.executable?(File.join(path, 'puppet')) && File.executable?(File.join(path, bin_name))
+      end
+      File.join([bin_path, bin_name].compact)
+    end
+
+    def self.is_aio_puppet?
+      puppet_command = search_puppet_path('puppet')
+      File.realpath(puppet_command).start_with?('/opt/puppetlabs')
+    rescue Errno::ENOENT
+      false
+    end
+
     def self.run_puppet(command)
-      env_vars = self.puppet_bin.start_with?('/opt/puppetlabs') ? clean_env_vars : ::ENV
       command = command.unshift(self.puppet_bin)
-      Open3.capture3(env_vars, *command, :unsetenv_others => true)
+
+      if is_aio_puppet?
+        Open3.capture3(clean_env_vars, *command, :unsetenv_others => true)
+      else
+        Open3.capture3(::ENV, *command, :unsetenv_others => false)
+      end
     end
 
     def self.clean_env_vars
