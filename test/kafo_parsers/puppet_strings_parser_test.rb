@@ -52,6 +52,8 @@ module KafoParsers
             specify { values['version'].must_equal '1.0' }
             specify { values['sub_version'].must_equal 'beta' }
             specify { values['undef'].must_equal :undef }
+            specify { values['multivalue'].must_equal ['x', 'y'] }
+            specify { values['mapped'].must_equal({'apples' => 'oranges', 'unquoted' => :undef}) }
             specify { values['debug'].must_equal 'true' }
             specify { values['variable'].must_equal '$::testing::params::variable' }
           end
@@ -90,6 +92,8 @@ module KafoParsers
             specify { types['version'].must_equal 'Any' }
             specify { types['typed'].must_equal 'boolean' }
             specify { types['remote'].must_equal 'boolean' }
+            specify { types['multivalue'].must_match /^(array|Array\[String\])$/ }
+            specify { types['mapped'].must_match /^(hash|Hash\[String, Variant\[String, Integer\]\])$/ }
           end
 
           describe "parsed conditions" do

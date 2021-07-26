@@ -173,10 +173,21 @@ module KafoParsers
     #
     # values are reported as strings which is issue especially for :under
     # strings are double quoted
+    # basic array and hashes are supported
     # others must be typecast manually according to reported type
     def sanitize(value)
       if (value.start_with?("'") && value.end_with?("'")) || (value.start_with?('"') && value.end_with?('"'))
         value = value[1..-2]
+      elsif value.start_with?('[') && value.end_with?(']')
+        # TODO: handle commas in strings like ["a,b", "c"]
+        value = value[1..-2].split(',').map { |v| sanitize(v.strip) }
+      elsif value.start_with?('{') && value.end_with?('}')
+        # TODO: handle commas and => in strings, like {"key" => "value,=>"}
+        value = value[1..-2].split(',').map do |v|
+          split = v.strip.split('=>')
+          raise 'Invalid hash' unless split.length == 2
+          split.map { |s| sanitize(s.strip) }
+        end.to_h
       end
       value = :undef if value == 'undef'
 

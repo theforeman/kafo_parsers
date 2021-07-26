@@ -28,6 +28,8 @@ BASIC_MANIFEST = <<EOS
 #                    type:boolean
 # $multivalue::      list of users
 #                    type:array
+# $mapped::          some mapping
+#                    type:hash
 # === Advanced parameters
 #
 # $debug::           we have advanced parameter, yay!
@@ -63,6 +65,7 @@ class testing(
   $multiline = undef,
   $typed = true,
   $multivalue = ['x', 'y'],
+  $mapped = {'apples' => 'oranges', unquoted => undef},
   $debug = true,
   $db_type = 'mysql',
   $remote = true,
@@ -101,7 +104,8 @@ BASIC_YARD_MANIFEST = <<EOS
 #                            documentation
 #                            consisting of 3 lines
 # @param typed [boolean]     something having its type explicitly set
-# @param multivalue [array]  list of users
+# @param multivalue          list of users
+# @param mapped              some mapping
 # @param m_i_a
 #
 # @param debug [boolean]     we have advanced parameter, yay!
@@ -133,7 +137,8 @@ class testing(
   Optional[Integer] $undef = undef,
   Optional[String] $multiline = undef,
   $typed = true,
-  $multivalue = ['x', 'y'],
+  Array[String] $multivalue = ['x', 'y'],
+  Hash[String, Variant[String, Integer]] $mapped = {'apples' => 'oranges', unquoted => undef},
   $debug = true,
   Enum['mysql', 'sqlite'] $db_type = 'mysql',
   $remote = true,
