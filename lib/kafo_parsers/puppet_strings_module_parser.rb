@@ -19,7 +19,8 @@ module KafoParsers
       data = {
         :object_type => content.data_type,
         :values      => content.values,
-        :validations => content.validations
+        :validations => content.validations,
+        :source      => content.source
       }
       data[:parameters] = data[:values].keys
       data.merge!(docs)
@@ -54,6 +55,10 @@ module KafoParsers
       self.data_type # we need to determine data_type before any further parsing
 
       self
+    end
+
+    def source
+      @parsed_hash['source']
     end
 
     # AIO and system default puppet bins are tested for existence, fallback to just `puppet` otherwise

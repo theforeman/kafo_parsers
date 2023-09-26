@@ -15,6 +15,7 @@ Gem::Specification.new do |spec|
   spec.files         = Dir['lib/**/*'] + ['LICENSE.txt', 'Rakefile', 'README.md']
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
+  spec.executables << 'convert-to-yardoc'
 
   spec.required_ruby_version = '>= 2.7', '< 4'
 
