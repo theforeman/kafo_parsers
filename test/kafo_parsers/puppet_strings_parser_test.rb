@@ -66,7 +66,6 @@ module KafoParsers
             specify { _(docs.keys).wont_include 'undocumented' }
             specify { _(docs['version']).must_equal ['some version number'] }
             specify { _(docs['multiline']).must_equal ['param with multiline', 'documentation', 'consisting of 3 lines'] }
-            specify { _(docs['typed']).wont_include 'type:bool' }
           end
 
           describe "parsed groups" do
@@ -84,16 +83,14 @@ module KafoParsers
           describe "parsed types" do
             let(:types) { data[:types] }
             specify { _(types['version']).must_equal 'Any' }
-            specify { _(types['typed']).must_equal 'boolean' }
-            specify { _(types['remote']).must_equal 'boolean' }
-            specify { _(types['multivalue']).must_match /^(array|Array\[String\])$/ }
-            specify { _(types['mapped']).must_match /^(hash|Hash\[String, Variant\[String, Integer\]\])$/ }
+            specify { _(types['remote']).must_equal 'Boolean' }
+            specify { _(types['multivalue']).must_equal('Array[String]') }
+            specify { _(types['mapped']).must_equal('Hash[String, Optional[String]]') }
           end
 
           describe "parsed conditions" do
             let(:conditions) { data[:conditions] }
             specify { _(conditions['version']).must_be_nil }
-            specify { _(conditions['typed']).must_be_nil }
             if manifest[:name] == "YARD class"
               specify { _(conditions['remote']).must_be_nil }
               specify { _(conditions['server']).must_equal '$remote' }

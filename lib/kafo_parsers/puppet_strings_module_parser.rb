@@ -88,7 +88,7 @@ module KafoParsers
     # returns data in following form
     # {
     #   :docs => { $param1 => ['documentation without types and conditions']}
-    #   :types => { $param1 => 'boolean'},
+    #   :types => { $param1 => 'Boolean'},
     #   :groups => { $param1 => ['Parameters', 'Advanced']},
     #   :conditions => { $param1 => '$db_type == "mysql"'},
     # }
@@ -107,7 +107,6 @@ module KafoParsers
         data[:docs] = rdoc_parser.docs
         data[:groups] = rdoc_parser.groups
         data[:conditions] = rdoc_parser.conditions
-        data[:types].merge! rdoc_parser.types
 
         # Highest precedence: data in YARD @param stored in the 'text' field
         tag_params.each do |param|
@@ -117,7 +116,6 @@ module KafoParsers
             data[:docs][param_name] = param_parser.doc if param_parser.doc
             data[:groups][param_name] = param_parser.group if param_parser.group
             data[:conditions][param_name] = param_parser.condition if param_parser.condition
-            data[:types][param_name] = param_parser.type if param_parser.type
           end
         end
       end
