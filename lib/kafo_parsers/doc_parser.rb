@@ -7,7 +7,7 @@ require 'kafo_parsers/param_doc_parser'
 
 module KafoParsers
   class DocParser
-    ATTRIBUTE_LINE   = /^(condition|type)\s*:\s*(.*)/
+    ATTRIBUTE_LINE   = /^(condition)\s*:\s*(.*)/
     HEADER_CONDITION = /\A(.+)\s*condition:\s*(.+)\Z/
 
     def initialize(text)
@@ -16,11 +16,10 @@ module KafoParsers
       @docs           = {}
       @groups         = {}
       @conditions     = {}
-      @types          = {}
       @rdoc           = rdoc_parser.parse(@text)
     end
 
-    attr_reader :docs, :groups, :types, :conditions
+    attr_reader :docs, :groups, :conditions
 
     # items is array of RDoc::Markup::* on one level
     def parse(items = @rdoc.parts)
@@ -57,7 +56,6 @@ module KafoParsers
     def parse_attributes(parameter, parser)
       condition              = [current_condition, parser.condition].compact.join(' && ')
       @conditions[parameter] = condition.empty? ? nil : condition
-      @types[parameter]      = parser.type unless parser.type.nil?
     end
 
     def parse_header(heading)

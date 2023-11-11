@@ -2,7 +2,7 @@ require 'kafo_parsers/exceptions'
 
 module KafoParsers
   class ParamDocParser
-    ATTRIBUTE_LINE   = /^(condition|group|type)\s*:\s*(.*)/
+    ATTRIBUTE_LINE   = /^(condition|group)\s*:\s*(.*)/
 
     def initialize(param, text)
       @param = param
@@ -11,7 +11,7 @@ module KafoParsers
     end
 
     attr_reader :param, :doc
-    [:condition, :group, :type].each do |attr|
+    [:condition, :group].each do |attr|
       define_method(attr) do
         @metadata[attr]
       end

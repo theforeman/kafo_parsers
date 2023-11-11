@@ -24,26 +24,20 @@ BASIC_MANIFEST = <<EOS
 # $multiline::       param with multiline
 #                    documentation
 #                    consisting of 3 lines
-# $typed::           something having it's type explicitly set
-#                    type:boolean
 # $multivalue::      list of users
-#                    type:array
 # $mapped::          some mapping
-#                    type:hash
 # === Advanced parameters
 #
 # $debug::           we have advanced parameter, yay!
-#                    type:boolean
 # $db_type::         can be mysql or sqlite
 #
 # ==== MySQL         condition: $db_type == 'mysql'
 #
 # $remote::          socket or remote connection
-#                    type: boolean
 # $server::          hostname
 #                    condition: $remote
 # $username::        username
-# $password::        type:password
+# $password::        db password
 #                    condition:$username != 'root'
 #
 # ==== Sqlite        condition: $db_type == 'sqlite'
@@ -60,15 +54,14 @@ class testing(
   $required,
   $version = '1.0',
   $sub_version = "beta",
-  $undocumented = 'does not have documentation',
+  String $undocumented = 'does not have documentation',
   $undef = undef,
   $multiline = undef,
-  $typed = true,
-  $multivalue = ['x', 'y'],
-  $mapped = {'apples' => 'oranges', unquoted => undef},
-  $debug = true,
+  Array[String] $multivalue = ['x', 'y'],
+  Hash[String, Optional[String]] $mapped = {'apples' => 'oranges', unquoted => undef},
+  Boolean $debug = true,
   $db_type = 'mysql',
-  $remote = true,
+  Boolean $remote = true,
   $server = 'mysql.example.com',
   $username = 'root',
   $password = 'toor',
@@ -76,7 +69,6 @@ class testing(
   $variable = $::testing::params::variable,
   $m_i_a = 'test') {
 
-  validate_string($undocumented)
   if $version == '1.0' {
     # this must be ignored since we can't evaluate conditions
     validate_bool($undef)
@@ -103,17 +95,16 @@ BASIC_YARD_MANIFEST = <<EOS
 # @param multiline           param with multiline
 #                            documentation
 #                            consisting of 3 lines
-# @param typed [boolean]     something having its type explicitly set
 # @param multivalue          list of users
 # @param mapped              some mapping
 # @param m_i_a
 #
-# @param debug [boolean]     we have advanced parameter, yay!
+# @param debug               we have advanced parameter, yay!
 #                            group:Advanced parameters
 # @param db_type             can be mysql or sqlite
 #                            group:Advanced parameters
 #
-# @param remote [boolean]    socket or remote connection
+# @param remote              socket or remote connection
 #                            group: Advanced parameters, MySQL
 # @param server              hostname
 #                            condition: $remote
@@ -136,12 +127,11 @@ class testing(
   String $undocumented = 'does not have documentation',
   Optional[Integer] $undef = undef,
   Optional[String] $multiline = undef,
-  $typed = true,
   Array[String] $multivalue = ['x', 'y'],
-  Hash[String, Variant[String, Integer]] $mapped = {'apples' => 'oranges', unquoted => undef},
+  Hash[String, Optional[String]] $mapped = {'apples' => 'oranges', unquoted => undef},
   $debug = true,
   Enum['mysql', 'sqlite'] $db_type = 'mysql',
-  $remote = true,
+  Boolean $remote = true,
   String $server = 'mysql.example.com',
   String $username = 'root',
   $password = 'toor',
@@ -149,7 +139,6 @@ class testing(
   String $variable = $::testing::params::variable,
   String $m_i_a = 'test') {
 
-  validate_string($undocumented)
   if $version == '1.0' {
     # this must be ignored since we can't evaluate conditions
     validate_bool($undef)
